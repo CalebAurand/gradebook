@@ -1,3 +1,33 @@
-//here is an initial comment for app.js file in the GradeBook Application
+//import express, dotenv, bodyparser, and choose which port to run on locally or set it variably
 const express = require('express');
-const bodyparser = require('body-parser');
+const bodyParser = require('body-parser');
+require('dotenv').config();
+//establish PORT app is to run on
+const PORT = process.env.PORT || 8500;
+
+//create a new express method for our server, assigned to the app variable
+const app = new express();
+// tell the app to use the bodyParser.json() method to be able to read json
+app.use(bodyParser.json());
+
+//create a variable to access the exported routes for teacher registration and login
+
+//tell the app to use these routes for teacher registration and login
+
+//create a variable to access the exported routes for student registration and login
+
+//tell the app to use the routes for student registration and login
+
+//create a variable to access the exported routes for teachers to use
+
+//tell the app to use the routes for teachers
+
+//create a variable to access the exported routes for students to use
+
+//tell the app to use the routes for students
+
+
+
+app.listen(PORT, function(){
+  console.log('server started listening on port ', PORT);
+});
