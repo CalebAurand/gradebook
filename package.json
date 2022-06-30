@@ -1,0 +1,38 @@
+{
+  "name": "grade-book",
+  "version": "1.0.0",
+  "description": "Simple grade book application that can be used by home school teachers, co-ops, and small schools.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CalebAurand/gradebook.git"
+  },
+  "keywords": [
+    "grade",
+    "book",
+    "gradebook",
+    "grade-book",
+    "tracking",
+    "calculating",
+    "school",
+    "teaching",
+    "education"
+  ],
+  "author": "Caleb Aurand",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CalebAurand/gradebook/issues"
+  },
+  "homepage": "https://github.com/CalebAurand/gradebook#readme",
+  "dependencies": {
+    "argon2": "^0.28.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1"
+  }
+}
