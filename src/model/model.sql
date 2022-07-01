@@ -24,26 +24,64 @@ CREATE TABLE students
 (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  birthday /*date type*/,
+  birthday DATE NOT NULL,
   emergency_contact VARCHAR(100),
   accomodations VARCHAR(200),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- CREATE THE CLASSES TABLE
-
+CREATE classes
+(
+id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+class_subject VARCHAR(25) NOT NULL, 
+class_name VARCHAR(25) NOT NULL,
+teacher_id INT NOT NULL,
+FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+);
 
 -- CREATE THE STUDENTS_CLASSES TABLE
-
+CREATE TABLE students_classes
+(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  class_id INT NOT NULL,
+  student_id INT NOT NULL,
+  FOREIGN KEY (class_id) REFERENCES classes(id),
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);
 
 -- CREATE THE CLASS_ATTENDANCE TABLE
-
+CREATE TABLE class_attendance
+(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  class_id INT NOT NULL,
+  student_id INT NOT NULL,
+  record_date DATE NOT NULL,
+  attendance VARCHAR(15) NOT NULL,
+  FOREIGN KEY (class_id) REFERENCES classes(id),
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);
 
 -- CREATE THE ASSIGNMENTS TABLE
-
+CREATE TABLE assignments
+(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  class_id INT NOT NULL,
+  assignment_name VARCHAR(50) NOT NULL,
+  assignment_description VARCHAR(500) NOT NULL,
+  FOREIGN KEY (class_id) REFERENCES classes(id)
+);
 
 -- CREATE THE GRADES TABLE
-
+CREATE TABLE grades
+(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  assignment_id INT NOT NULL,
+  student_id INT NOT NULL,
+  grade INT NOT NULL,
+  FOREIGN KEY (assignment_id) REFERENCES assignments(id),
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);
 
 /********import all the functions from the students controller.js file for use of retrieving student's:
  * //test, quiz, hw, project grades 
@@ -51,14 +89,20 @@ CREATE TABLE students
  * gpa
 */
 
+-- get all the grades for a student
+SELECT grade FROM grades WHERE student_id = ?;
+
 -- get the test grades for a student
-SELECT 
+SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
+
 -- get the quiz grades for a student
+SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 
 -- get the homework grades for a student
+SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 
 -- get the project grades for a student
-SELECT 
+SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 
 
 
