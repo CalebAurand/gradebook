@@ -1,9 +1,15 @@
 /*****Student Routes*****/
 
 //import express
-// import student registration controller
+const express = require('express');
 //define a new router for use for student registration router
+const studentRegRouter = new express.Router();
 
+// import student registration controller
+const studentRegController = require('../controllers/studentRegCtrl');
+
+//import auth middlware to verify jwt
+const auth = require('../middleware/auth');
 
 //route for student registration
 /*POST '/registerStudent' - registers a new student to the gradebook app 
@@ -16,6 +22,8 @@
     adds the new user to the students table, 
     and links the userid as a foreign key on the students table
 */
+studentRegRouter.post('/student-registration', auth.verifyJWT, studentRegController.registerStudent);
+
 
 //route for student login
 /*POST '/studentlogin'- allows a student to login to see their grades / assignments
@@ -26,6 +34,7 @@
   if successful:
     returns a JWT with the student id attached
 */
-
+studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
 
 //export student registration/login router
+module.exports = studentRegRouter;

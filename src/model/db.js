@@ -14,3 +14,23 @@
  * 
  * then export the database connection using the variable connection
  */
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  host: process.env.DB_HOST
+})
+
+connection.connect();
+
+connection.query("select now()", function(err, result){
+  if(err){
+    console.log("Could not connect to db", err)
+  } else {
+    console.log("Connected to db", result)
+  }
+});
+
+module.exports = connection;
