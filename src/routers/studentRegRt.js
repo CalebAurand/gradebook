@@ -22,7 +22,7 @@ const auth = require('../middleware/auth');
     adds the new user to the students table, 
     and links the userid as a foreign key on the students table
 */
-studentRegRouter.post('/student-registration', auth.verifyJWT, studentRegController.registerStudent);
+studentRegRouter.post('/student-registration', studentRegController.registerStudent);
 
 
 //route for student login
@@ -34,7 +34,7 @@ studentRegRouter.post('/student-registration', auth.verifyJWT, studentRegControl
   if successful:
     returns a JWT with the student id attached
 */
-studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
+// studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
 
 //export student registration/login router
 module.exports = studentRegRouter;

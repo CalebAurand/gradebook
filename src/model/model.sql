@@ -5,9 +5,10 @@
 CREATE TABLE users 
 (
 id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
-user_name VARCHAR(50) NOT NULL, 
+user_name VARCHAR(50) NOT NULL,
+user_role VARCHAR(10) NOT NULL,
 email VARCHAR(60) NOT NULL UNIQUE,
-pw_hash VARCHAR(1000) NOT NULL,
+pw_hash VARCHAR(1000) NOT NULL
 );
 
 -- CREATE THE TEACHERS TABLE
@@ -31,7 +32,7 @@ CREATE TABLE students
 );
 
 -- CREATE THE CLASSES TABLE
-CREATE classes
+CREATE TABLE classes
 (
 id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 class_subject VARCHAR(25) NOT NULL, 
@@ -106,22 +107,30 @@ SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 
 
 
-/*****Teacher Routes // teacher information*****
-  GET '/teachers' - returns a list of the teachers names for their school
+/*****Teacher Routes // teacher information*****/
+  -- GET '/teachers' - returns a list of the teachers names for their school
+  -- ? variable parameter is a range or list of all of the teachers ids
+SELECT user_name FROM users WHERE user_role = 'teacher';
 
-  GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+  -- GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+SELECT users.user_name, users.email, teachers.certifications FROM users INNER JOIN teachers ON teachers.certifications WHERE teachers.id = ?;
 
-  PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
+  -- PUT '/teacher/:id' - (protected route) allows a teacher to update their name
+UPDATE users SET user_name = ? WHERE id = ?;
 
-  DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+-- -- PUT '/teacher/:id' - (protected route) after verifying jwt again, allows a user to update their password
+UPDATE users SET pw_hash = ? WHERE id = ?;
 
-  **POST** teachers are not allowed to make other teachers accounts
-  *DELETE* teachers **are not** authorized to delete *other* teacher accounts
-*/
+  -- DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+DELETE FROM teachers WHERE id = ?;
 
-/******Teacher Routes // Class Creation/Information*****
+  -- **POST** teachers are not allowed to make other teachers accounts
+  -- *DELETE* teachers **are not** authorized to delete *other* teacher accounts
 
-  POST '/class' - (protected route) creates a new class
+
+/******Teacher Routes // Class Creation/Information*****/
+
+ /* POST '/class' - (protected route) creates a new class
     takes in: 
         Subject VARCHAR(50) NOT NULL
         Class_Name VARCHAR(60) NOT NULL
@@ -129,18 +138,22 @@ SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 
     then it:
         creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
+  */
+INSERT INTO classes(class_subject, class_name, teacher_id) VALUES (?, ?, ?);
 
-  GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+  -- GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+SELECT class_subject, class_name FROM classes GROUP BY class_subject WHERE teacher_id = ?;
 
-  GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+  -- GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+SELECT class_subject, class_name, teacher_id, FROM classes WHERE id = ?;
 
-  PUT '/class/:id' - (protected route) allows a teacher to update their class information
-    [subject, class_name]
+  -- PUT '/class/:id' - (protected route) allows a teacher to update their class information
+    -- [subject, class_name]
+UPDATE classes SET class_subject = ?, class_name = ?, teacher_id = ?, WHERE ID = ?; 
 
-  DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
-    **constraints: there are no foreign keys relying on this class_ID yet**
-*/
-
+  -- DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
+    -- **constraints: there are no foreign keys relying on this class_ID yet**
+DELETE FROM classes WHERE id = ?;
 
 /*****Teacher Routes // students_classes Table *****
   POST '/class_name' - (protected route) allows a teacher to add a new student in their class
@@ -244,17 +257,32 @@ SELECT grade FROM grades WHERE student_id = ? AND assignment_id = ?;
 */
 
 
-/*****Teacher Routes // Student Viewing or Deletion*****
-  DELETE '/student/:id' (protected route) allows a teacher to delete a student record from the students table, and from the users table **if authorized**
+/*****Teacher Routes // Student Viewing or Deletion*****/
+  -- DELETE '/student/:id' (protected route) allows a teacher to delete a student record from the students table, and from the users table **if authorized**
+DELETE FROM students WHERE id = ?;
+  -- POST **Teachers cannot create students, that is done through student registration with a unique email**
+  -- PUT ****
+  -- GET '/student/:id' - teacher accesses student's profile information to see their info: accomodations, emergency contact, etc.
 
-  POST **Teachers cannot create students, that is done through student registration with a unique email**
-  PUT ****
-  GET '/student/:id' - teacher accesses student's profile information to see their info: accomodations, emergency contact, etc.
-*/
-
-
-
+SELECT users.user_name, students.id, students.birthday, students.emergency_contact, students.accomodations FROM users INNER JOIN students ON students.id WHERE students.id = ?;
 
 
-/*/export the functions for teachers controller*/
+/*****Student Routes*****/
+-- //route for student registration
+INSERT INTO users (user_name, email, pw_hash) VALUES (?, ?, ?);
 
+-- //route for student login
+SELECT pw_hash FROM users WHERE email = ?;
+
+-- //GET '/studentGrades' - returns a list of the students assignments and the associated grades
+
+
+-- //GET '/studentGrade/:id' - gives the details and any comments or notes that the teacher wrote on the student's individual assignment-grade
+
+-- //PUT '/student/:id' - (protected route) allows a student to update their password
+
+-- //POST*****students do not have access to create new students*****
+-- //PUT*****students do not have access to update email, name, or class associations*****
+-- //DELETE*****students do not have access to delete their profile, or other students'*****
+
+-- //DELETE '/student/:id' (protected route) allows a teacher to delete a student record from the students table, and from the users table **if authorized**

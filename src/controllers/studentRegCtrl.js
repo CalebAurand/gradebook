@@ -12,8 +12,25 @@ const jwt = require('jsonwebtoken');
  * take in the minimum necessary information to create a new user for the app
  * store the hash of the password in the database, in their row
  */
-const registerStudent = (req, res) => {
+const registerStudent = async (req, res) => {
   console.log('register student');
+
+  let sql = "INSERT INTO users (user_name, user_role, email, pw_hash) VALUES (?, ?, ?, ?);";
+  let name = req.body.name;
+  let email = req.body.email;
+  let role = 'student';
+  let password = req.body.password;
+  let pwHash = await argon.hash(password);
+  let params = [name, role, email, pwHash];
+
+  db.query(sql, params, function(err, result){
+    if(err){
+      console.log("could not add user", err);
+      res.sendStatus(500);
+    }else{
+      res.sendStatus(204);
+    }
+  });
 
 };
 
