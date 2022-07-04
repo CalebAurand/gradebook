@@ -1,17 +1,17 @@
+/**************Teacer Routes **********************/
 //import express
+const express = require('express');
 // import teacher registration controller
+const teacherRegCtrl = require('../controllers/teacherRegCtrl');
 //define a new router for use for teachers registration router
+const teacherRegRouter = new express.Router();
 
-/*****Teacher Routes // login and Authorization*****
+//import auth.js file verifyJWT functionality
+const auth = require('../middleware/auth');
+
+/*****Teacher Routes // login and Authorization*****/
 //route for teacher registration
-
-POST '/register' - registers a new Teacher for the gradebook
-  registers a teacher in the users table with role teacher, and in the teachers table with a teacher_ID
-  takes in: -- automatically generates an id number, and a Role of teacher in the database
-      name VARCHAR(50) NOT NULL
-      email VARCHAR(50) NOT NULL UNIQUE
-      pw_hash VARCHAR(1000) NOT NULL
-*/
+teacherRegRouter.post('/teacher-registration', auth.verifyJWT, teacherRegCtrl.registerTeacher);
 
 //route for teacher login
 /*
@@ -20,6 +20,7 @@ POST '/login' - logs a teacher in to the gradebook, verifies email and pw_hash, 
       email
       password
 */
-
+teacherRegRouter.post('/teacher-login', auth.verifyJWT, teacherRegCtrl.teacherLogin);
 
 //export teacher registration/login router
+module.exports = teacherRegRouter;

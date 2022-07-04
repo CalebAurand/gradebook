@@ -15,7 +15,7 @@ pw_hash VARCHAR(1000) NOT NULL
 CREATE TABLE teachers
 (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
+  user_id INT NOT NULL UNIQUE,
   certifications VARCHAR(200),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -24,7 +24,7 @@ CREATE TABLE teachers
 CREATE TABLE students
 (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
+  user_id INT NOT NULL UNIQUE,
   birthday DATE NOT NULL,
   emergency_contact VARCHAR(100),
   accomodations VARCHAR(200),

@@ -1,4 +1,4 @@
-/*****Student Routes*****/
+/*****Student Registration Routes*****/
 
 //import express
 const express = require('express');
@@ -19,8 +19,6 @@ const auth = require('../middleware/auth');
     password >>>turned into a password hash
 
   then creates a new user in the users table with role of student
-    adds the new user to the students table, 
-    and links the userid as a foreign key on the students table
 */
 studentRegRouter.post('/student-registration', studentRegController.registerStudent);
 
@@ -34,7 +32,12 @@ studentRegRouter.post('/student-registration', studentRegController.registerStud
   if successful:
     returns a JWT with the student id attached
 */
-// studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
+studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
+
+/* route for creating a student Id
+adds the new user to the students table, 
+    and links the userid as a foreign key on the students table*/
+studentRegRouter.post('/create-studentId', auth.verifyJWT, studentRegController.createStudentId);
 
 //export student registration/login router
 module.exports = studentRegRouter;
