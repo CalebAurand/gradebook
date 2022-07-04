@@ -68,6 +68,7 @@ CREATE TABLE assignments
 (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   class_id INT NOT NULL,
+  assignment_type VARCHAR(15) NOT NULL,
   assignment_name VARCHAR(50) NOT NULL,
   assignment_description VARCHAR(500) NOT NULL,
   FOREIGN KEY (class_id) REFERENCES classes(id)

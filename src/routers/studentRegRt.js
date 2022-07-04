@@ -32,12 +32,15 @@ studentRegRouter.post('/student-registration', studentRegController.registerStud
   if successful:
     returns a JWT with the student id attached
 */
-studentRegRouter.post('/student-login', auth.verifyJWT, studentRegController.studentLogin);
+studentRegRouter.post('/student-login', studentRegController.studentLogin);
 
 /* route for creating a student Id
 adds the new user to the students table, 
     and links the userid as a foreign key on the students table*/
 studentRegRouter.post('/create-studentId', auth.verifyJWT, studentRegController.createStudentId);
+
+//route for getting the student id after logging in and having the userId
+studentRegRouter.post('/getStudentId', auth.verifyJWT, studentRegController.getStudentId);
 
 //export student registration/login router
 module.exports = studentRegRouter;

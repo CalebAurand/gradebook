@@ -1,7 +1,20 @@
 /**student controller functions for the grade book app */
-
-
+const db = require('../model/db');
 //function gets all the test grades for a student, and returns the array of test grades
+const allTests = (req, res)=>{
+  let studentId = req.token.studentId;
+  //sql for the db query for all the test grades for a student
+  let sql = "SELECT assignment_name, grades.grade FROM assignments INNER JOIN ON assignments.id = grades.assignment_id WHERE grades.student_id = ?;";
+  let pararms = [studentId];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      res.sendStatus(500);
+    }else {
+      console.log("grade results", results);
+      res.send(results);
+    }
+  })
+}
 
 //function gets all the quiz grades for a student, and returns the array of quiz grades
 
@@ -23,3 +36,6 @@
 //test, quiz, hw, project grades
 //average for test, quiz, hw, project grades
 //gpa
+module.exports = {
+  allTests,
+}
