@@ -22,5 +22,10 @@ POST '/login' - logs a teacher in to the gradebook, verifies email and pw_hash, 
 */
 teacherRegRouter.post('/teacher-login', auth.verifyJWT, teacherRegCtrl.teacherLogin);
 
+//route for teachers to have their teacher Id created
+teacherRegRouter.post('/createTeacherId', auth.verifyJWT, teacherRegCtrl.createTeacherId);
+
+teacherRegRouter.get('/get-id', auth.verifyJWT, teacherRegCtrl.getTeacherId);
+
 //export teacher registration/login router
 module.exports = teacherRegRouter;

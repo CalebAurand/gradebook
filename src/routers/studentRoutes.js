@@ -7,11 +7,16 @@ const studentRouter = new express.Router();
 // import student registration controller
 const studentController = require('../controllers/studentControllers');
 
+//bring in the studentRegistrationController to use the getStudentId function
+const studentRegController = require('../controllers/studentRegCtrl');
+
 //import auth middlware to verify jwt
 const auth = require('../middleware/auth');
 
 //GET '/studentGrades' - returns a list of the students assignments and the associated grades
-studentRouter.get('/student-tests', auth.verifyJWT, studentController.allTests);
+studentRouter.get('/student-tests', auth.verifyJWT, studentRegController.getStudentId, studentController.allTests);
+
+studentRouter.get('/student-quizzes', auth.verifyJWT, studentRegController.getStudentId, studentController.allQuizzes);
 
 //GET '/studentGrade/:id' - gives the details and any comments or notes that the teacher wrote on the student's individual assignment-grade
 

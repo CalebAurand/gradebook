@@ -80,7 +80,6 @@ const studentLogin = async (req, res) => {
     let token = {
       "userId": userId,
       "email": email,
-      "studentId": studentId,
     };
     
     if(goodPassword){
@@ -116,6 +115,7 @@ const createStudentId = async (req, res) => {
 };
 
 const getStudentId = (req, res, next) => {
+  console.log("getting student Id")
   let userId = req.token.userId;
   let studentId;
   let sql = "SELECT id FROM students WHERE user_id = ?;";

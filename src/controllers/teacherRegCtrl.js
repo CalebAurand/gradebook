@@ -114,54 +114,56 @@ const createTeacherId = async (req, res) => {
   console.log("create teacher Id");
 
   //only call this callback function after the registration callback function
-  let sql = "SELECT id FROM teachers WHERE user_id = ?;";
+  let sql = "INSERT INTO teachers(user_id) VALUES(?);";
   let userId = req.token.userId;
+  let params = [userId];
 
-  //set teacher Id as undefined, but ready to hold the teacherId if found
-  let teacherId;
-  let teacherParams = [userId];
+  console.log(req.token);
 
   //check to see if that user id has a teacher id already
-  db.query(sql, teacherParams, (err, results) => {
+  db.query(sql, params, (err, results) => {
     if(err){
       //do this
       console.log("server error, teacher id could not be created", err);
       res.sendStatus(500);
       return;
     } else {
-      if(results.length > 1){
-        res.sendStatus(500);
-        return;
-      }
-    teacherId = results[0].id;
-      if(teacherId){
-        console.log("teacher id found", teacherId);
-        res.send('teacher id found');
-        return;
+      res.sendStatus(204);
       };
-      //if no teacherId found for the userId >>> then we want to create one
-      //error code 400 for testing right now
-
-      let createSql = "INSERT INTO teachers(user_id) VALUES(?);";
-      let createParams = [userId];
-      if(results.length == 0){
-        console.log("creating teacherId", teacherId);
-        db.query(createSql, createParams, (err, createResults)=>{
-          if(err){
-            console.log("server error");
-            return;
-          }else{
-            res.sendStatus(204);
-          }
-        })
-      }
-    };
   });
 };
+
+const getTeacherId = (req, res, next) => {
+  let userId = req.token.userId;
+  let teacherId;
+  let sql = "SELECT id FROM teachers WHERE user_id = ?;";
+  let params = [userId];
+  //query the teachers table for the teacher id
+  db.query(sql, params, async (err, results)=>{
+    if(err){
+      console.log("server error", err);
+      res.sendStatus(500);
+      return;
+    }
+    if(results.length > 1){
+      res.sendStatus(500);
+      return;
+    }
+    if(results.length == 0){
+      console.log('no teacher id found')
+      return;
+    } else {
+    teacherId = results[0].id;
+    req.token.teacherId = teacherId;
+    next();
+    };
+  });
+}
 
 //exports the teacher registration, and teacher login functions
 module.exports = {
   registerTeacher,
   teacherLogin,
   createTeacherId,
+  getTeacherId
 }

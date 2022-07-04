@@ -1,11 +1,16 @@
 /**student controller functions for the grade book app */
 const db = require('../model/db');
+
 //function gets all the test grades for a student, and returns the array of test grades
 const allTests = (req, res)=>{
+  console.log("getting student tests");
   let studentId = req.token.studentId;
+  console.log("token", req.token);
+  console.log("studentId", studentId);
+  let assignment_type = 'test';
   //sql for the db query for all the test grades for a student
-  let sql = "SELECT assignment_name, grades.grade FROM assignments INNER JOIN ON assignments.id = grades.assignment_id WHERE grades.student_id = ?;";
-  let pararms = [studentId];
+  let sql = "SELECT assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type =?;";
+  let params = [studentId, assignment_type];
   db.query(sql, params, (err, results)=>{
     if(err){
       res.sendStatus(500);
@@ -14,10 +19,27 @@ const allTests = (req, res)=>{
       res.send(results);
     }
   })
-}
+};
 
 //function gets all the quiz grades for a student, and returns the array of quiz grades
-
+const allQuizzes = (req, res)=>{
+  console.log("getting student quizzes");
+  let studentId = req.token.studentId;
+  console.log("token", req.token);
+  console.log("studentId", studentId);
+  let assignment_type = 'quiz';
+  //sql for the db query for all the test grades for a student
+  let sql = "SELECT assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type = ?;";
+  let params = [studentId, assignment_type];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      res.sendStatus(500);
+    }else {
+      console.log("grade results", results);
+      res.send(results);
+    }
+  })
+};
 //function gets all the homework grades for a student, and returns the array of hw grades
 
 //function gets all the project grades for a student, and returns the array of the project grades
@@ -38,4 +60,5 @@ const allTests = (req, res)=>{
 //gpa
 module.exports = {
   allTests,
+  allQuizzes,
 }
