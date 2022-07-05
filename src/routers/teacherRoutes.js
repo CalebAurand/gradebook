@@ -40,15 +40,17 @@ teacherRouter.get('/view-teacher', auth.verifyJWT, teacherRegController.getTeach
 //       creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
 teacherRouter.post('/create-class', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.createClass);
 
-/*
-GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
 
-GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+// GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+teacherRouter.get('/view-classes/:id', teacherController.getClasses);
 
-PUT '/class/:id' - (protected route) allows a teacher to update their class information
-  [subject, class_name]
+// GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+teacherRouter.get('/view-class/:id', teacherController.getClass);
 
-DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
+// PUT '/class/:id' - (protected route) allows a teacher to update their class information
+  // [subject, class_name]
+
+/*DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
   **constraints: there are no foreign keys relying on this class_ID yet**
 */
 

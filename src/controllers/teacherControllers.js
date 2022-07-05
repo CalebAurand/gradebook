@@ -90,8 +90,38 @@ const createClass = (req, res) => {
 };
 
 //   GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+const getClasses = (req, res) => {
+  console.log("get classes");
+  let teacherId = req.params.id;
+  let sql = "SELECT class_subject, class_name FROM classes WHERE teacher_id = ?";
+  let params = [teacherId];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    }else{
+      res.json(results);
+    };
+  });
+};
 
 //   GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+const getClass = (req, res) => {
+  console.log("get class with teacher_id");
+  let classId = req.params.id;
+  let sql = "SELECT id, class_subject, class_name, teacher_id FROM classes WHERE id = ?;";
+  let params = [classId];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    }else{
+      res.json(results);
+    };
+  });
+};
 
 //   PUT '/class/:id' - (protected route) allows a teacher to update their class information
 //     [subject, class_name]
@@ -220,4 +250,6 @@ module.exports = {
   viewTeachers,
   viewOneTeacher,
   createClass,
+  getClasses,
+  getClass,
 }

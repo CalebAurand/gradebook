@@ -143,8 +143,8 @@ DELETE FROM teachers WHERE id = ?;
   */
 INSERT INTO classes(class_subject, class_name, teacher_id) VALUES (?, ?, ?);
 
-  -- GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
-SELECT class_subject, class_name FROM classes GROUP BY class_subject WHERE teacher_id = ?;
+  -- GET '/classes' - returns all the classes that a teacher is assigned to
+SELECT class_subject, class_name FROM classes WHERE teacher_id = ?;
 
   -- GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
 SELECT class_subject, class_name, teacher_id, FROM classes WHERE id = ?;
