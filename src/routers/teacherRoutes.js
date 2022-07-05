@@ -1,29 +1,46 @@
 /**Teacher Routes for the grade book application */
+//import express
+const express = require('express');
+//define a new router for use for student registration router
+const teacherRouter = new express.Router();
 
-/*****Teacher Routes // teacher information*****
-  GET '/teachers' - returns a list of the teachers names for their school
+// import student registration controller
+const teacherController = require('../controllers/teacherControllers');
 
-  GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+//bring in the studentRegistrationController to use the getStudentId function
+const teacherRegController = require('../controllers/teacherRegCtrl');
 
-  PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
+//import auth middlware to verify jwt
+const auth = require('../middleware/auth');
 
-  DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+/*****Teacher Routes // teacher information*****/
+  // GET '/teachers' - returns a list of the teachers names for their school
+teacherRouter.get('/view-teachers', teacherController.viewTeachers);
 
-  **POST** teachers are not allowed to make other teachers accounts
-  *DELETE* teachers **are not** authorized to delete *other* teacher accounts
-*/
+  // GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+teacherRouter.get('/view-teacher', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.viewOneTeacher);
 
-/******Teacher Routes // Class Creation/Information*****
+//   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
 
-POST '/class' - (protected route) creates a new class
-  takes in: 
-      Subject VARCHAR(50) NOT NULL
-      Class_Name VARCHAR(60) NOT NULL
-      Teacher_ID INT FOREIGN KEY
+//   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
 
-  then it:
-      creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
+//   **POST** teachers are not allowed to make other teachers accounts
+//   *DELETE* teachers **are not** authorized to delete *other* teacher accounts
+// */
 
+/******Teacher Routes // Class Creation/Information*****/
+
+// POST '/class' - (protected route) creates a new class
+//   takes in: 
+//       Subject VARCHAR(50) NOT NULL
+//       Class_Name VARCHAR(60) NOT NULL
+//       Teacher_ID INT FOREIGN KEY
+
+//   then it:
+//       creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
+teacherRouter.post('/create-class', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.createClass);
+
+/*
 GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
 
 GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
@@ -145,3 +162,5 @@ POST **Teachers cannot create students, that is done through student registratio
 PUT ****
 GET '/student/:id' - teacher accesses student's profile information to see their info: accomodations, emergency contact, etc.
 */
+
+module.exports = teacherRouter;

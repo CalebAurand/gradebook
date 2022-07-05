@@ -1,4 +1,5 @@
 /**teacher controller functions for the grade book app */
+const db = require('../model/db');
 
 /********import all the functions from the students controller.js file for use of retrieving student's:
  * //test, quiz, hw, project grades 
@@ -9,40 +10,95 @@
 
 
 
-/*****Teacher Routes // teacher information*****
-  GET '/teachers' - returns a list of the teachers names for their school
+/*****Teacher Routes // teacher information*****/
+  // GET '/teachers' - returns a list of the teachers names for their school
+const viewTeachers = (req, res) => {
+  console.log('viewTeachers names')
+  //no params, function available to anyone viewing the site
+  let sql = "SELECT user_name FROM users WHERE user_role = 'teacher';";
 
-  GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+  //query the database for the teacher names
+  db.query(sql, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    }else{
+      res.json(results);
+    };
+  });
+};
 
-  PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
+//   GET '/teacher/:id' - (protected route) returns a teachers name, and email address
+const viewOneTeacher = (req, res) => {
+  console.log("view teacher details")
+  let teacherId = req.token.teacherId;
 
-  DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+  let sql = "SELECT teachers.id, user_name, email, teachers.certifications FROM users INNER JOIN teachers ON users.id = teachers.user_id WHERE teachers.id = ?;"
+  let params = [teacherId]
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      if(results.length > 1){
+        res.json(500);
+        return;
+      };
+      if(results.length == 0){
+        res.json(400);
+        return;
+      };
+      res.json(results);
+    };
+  });
+};
+//   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
 
-  **POST** teachers are not allowed to make other teachers accounts
-  *DELETE* teachers **are not** authorized to delete *other* teacher accounts
-*/
+//   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
 
-/******Teacher Routes // Class Creation/Information*****
+//   **POST** teachers are not allowed to make other teachers accounts
+//   *DELETE* teachers **are not** authorized to delete *other* teacher accounts
+// */
 
-  POST '/class' - (protected route) creates a new class
-    takes in: 
-        Subject VARCHAR(50) NOT NULL
-        Class_Name VARCHAR(60) NOT NULL
-        Teacher_ID INT FOREIGN KEY
+/******Teacher Routes // Class Creation/Information*****/
 
-    then it:
-        creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
+  // POST '/class' - (protected route) creates a new class
+  //   takes in: 
+  //       class_ubject VARCHAR(50) NOT NULL
+  //       class_Name VARCHAR(60) NOT NULL
+  //       teacher_id INT FOREIGN KEY
 
-  GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+  //   then it:
+  //       creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
+const createClass = (req, res) => {
+  console.log("create class");
+  let teacherId = req.token.teacherId;
+  let class_subject = req.body.class_subject;
+  let class_name = req.body.class_name;
+  let params = [class_subject, class_name, teacherId];
 
-  GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+  let sql = "INSERT INTO classes(class_subject, class_name, teacher_id) VALUES (?, ?, ?);"
 
-  PUT '/class/:id' - (protected route) allows a teacher to update their class information
-    [subject, class_name]
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not create class", err);
+      res.sendStatus(500);
+    }else{
+      res.sendStatus(204);
+    };
+  });
+};
 
-  DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
-    **constraints: there are no foreign keys relying on this class_ID yet**
-*/
+//   GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+
+//   GET '/class/:id' - returns the subject, class_name, and teacher_id for a class
+
+//   PUT '/class/:id' - (protected route) allows a teacher to update their class information
+//     [subject, class_name]
+
+//   DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
+//     **constraints: there are no foreign keys relying on this class_ID yet**
+// */
 
 
 /*****Teacher Routes // students_classes Table *****
@@ -160,4 +216,8 @@
 
 
 //export the functions for teachers controller
-
+module.exports = {
+  viewTeachers,
+  viewOneTeacher,
+  createClass,
+}

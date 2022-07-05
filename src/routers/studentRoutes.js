@@ -19,6 +19,7 @@ studentRouter.get('/student-tests', auth.verifyJWT, studentRegController.getStud
 studentRouter.get('/student-quizzes', auth.verifyJWT, studentRegController.getStudentId, studentController.allQuizzes);
 
 //GET '/studentGrade/:id' - gives the details and any comments or notes that the teacher wrote on the student's individual assignment-grade
+studentRouter.get('/student-grade/:id', auth.verifyJWT, studentRegController.getStudentId, studentController.getGrade);
 
 //PUT '/student/:id' - (protected route) allows a student to update their password
 

@@ -9,7 +9,7 @@ const allTests = (req, res)=>{
   console.log("studentId", studentId);
   let assignment_type = 'test';
   //sql for the db query for all the test grades for a student
-  let sql = "SELECT assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type =?;";
+  let sql = "SELECT assignments.id, assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type =?;";
   let params = [studentId, assignment_type];
   db.query(sql, params, (err, results)=>{
     if(err){
@@ -29,7 +29,7 @@ const allQuizzes = (req, res)=>{
   console.log("studentId", studentId);
   let assignment_type = 'quiz';
   //sql for the db query for all the test grades for a student
-  let sql = "SELECT assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type = ?;";
+  let sql = "SELECT assignments.id, assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.assignment_type = ?;";
   let params = [studentId, assignment_type];
   db.query(sql, params, (err, results)=>{
     if(err){
@@ -40,6 +40,7 @@ const allQuizzes = (req, res)=>{
     }
   })
 };
+
 //function gets all the homework grades for a student, and returns the array of hw grades
 
 //function gets all the project grades for a student, and returns the array of the project grades
@@ -52,6 +53,25 @@ const allQuizzes = (req, res)=>{
 
 //function returns the average of the student's project grades
 
+//function returns the name description and details of one grade by student id
+const getGrade = (req, res) => {
+  console.log("getting student detailed grade");
+  let studentId = req.token.studentId;
+  let assignmentId = req.params.id;
+
+  //sql for the db query for all the test grades for a student
+  let sql = "SELECT assignments.id, assignments.assignment_name, assignments.assignment_description, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.id = ?;";
+
+  let params = [studentId, assignmentId];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      res.sendStatus(500);
+    }else {
+      res.json(results);
+    }
+  })
+};
+
 //functions returns the student's gpa
 
 //export the functions for student's:
@@ -61,4 +81,5 @@ const allQuizzes = (req, res)=>{
 module.exports = {
   allTests,
   allQuizzes,
+  getGrade
 }

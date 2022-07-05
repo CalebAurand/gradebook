@@ -20,14 +20,17 @@ app.use(appRouter);
 let teacherRegRouter = require('./routers/teacherRegRt');
 app.use(teacherRegRouter);
 
+//create a variable to access the exported routes for teachers to use
+//tell the app to use the routes for teachers
+let teacherRouter = require('./routers/teacherRoutes');
+app.use(teacherRouter);
 
 //create a variable to access the exported routes for student registration and login
 //tell the app to use the routes for student registration and login
 let studentRegRouter = require('./routers/studentRegRt');
 app.use(studentRegRouter);
 
-//create a variable to access the exported routes for teachers to use
-//tell the app to use the routes for teachers
+
 
 //create a variable to access the exported routes for students to use
 //tell the app to use the routes for students
