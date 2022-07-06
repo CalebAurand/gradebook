@@ -20,7 +20,7 @@ teacherRouter.get('/view-teachers', teacherController.viewTeachers);
   // GET '/teacher/:id' - (protected route) returns a teachers name, and email address
 teacherRouter.get('/view-teacher', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.viewOneTeacher);
 
-//   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
+//   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or **password **password update functionality coming later
 
 //   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
 
@@ -49,33 +49,38 @@ teacherRouter.get('/view-class/:id', teacherController.getClass);
 
 // PUT '/class/:id' - (protected route) allows a teacher to update their class information
   // [subject, class_name]
-
+teacherRouter.put('/update-class/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.updateClass);
 /*DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
   **constraints: there are no foreign keys relying on this class_ID yet**
 */
+teacherRouter.delete('/delete-class/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.deleteClass);
 
-
-/*****Teacher Routes // students_classes Table *****
-POST '/class_name' - (protected route) allows a teacher to add a new student in their class
+/*****Teacher Routes // students_classes Table *****/
+/*POST '/class_name' - (protected route) allows a teacher to add a new student in their class
  takes in:
+   ***** request parameter is the class id*****
     class_ID
     student_ID,
-  then * adds the student to the class
+  then * adds the student to the class*/
+teacherRouter.post('/add-student/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.addStudent);
 
-GET '/class_name' - (protected route) allows a teacher to view all students in their class
+/*GET '/class_name' - (protected route) allows a teacher to view all students in their class
   takes in:
-    class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID
+    class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID*/
+teacherRouter.get('/view-class-students/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.viewStudentClass)
 
-GET '/class_name/:id' - (protected route) allows a teacher to view one specific student's profile information that is assigned to their class
+/*GET '/class_name/:id' - (protected route) allows a teacher to view one specific student's profile information that is assigned to their class
   takes in:
-    student_ID from the path paremeter id
+    student_ID from the path paremeter id*/
+teacherRouter.get('/view-student/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.viewStudent)
 
-PUT **student ids will not be updated for a class roster, simply deleted or added**
+// PUT **student ids will not be updated for a class roster, simply deleted or added**
 
-DELETE '/class_name/:id' (protected route) allows a teacher to delete a student from the students_classes table
+/*DELETE '/class_name/:id' (protected route) allows a teacher to delete a student from the students_classes table
   takes in:
     student_id from the path parameter id
 */
+teacherRouter.delete('/remove-student', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.removeStudent);
 
 /*****Teacher Routes // Assignment Creation/Information*****
 POST '/assignment' - (protected route) allows a teacher to create a new assignment

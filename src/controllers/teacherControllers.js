@@ -118,6 +118,17 @@ const getClass = (req, res) => {
       console.log("could not query db", err);
       res.sendStatus(500);
     }else{
+      //if there is more than one class
+      if(results.length > 1){
+        res.sendStatus(500);
+        return;
+      };
+      //if there is no class found
+      if(results.length == 0){
+        res.sendStatus(404);
+        return;
+      };
+      //if good results
       res.json(results);
     };
   });
@@ -125,33 +136,180 @@ const getClass = (req, res) => {
 
 //   PUT '/class/:id' - (protected route) allows a teacher to update their class information
 //     [subject, class_name]
+const updateClass = (req, res) => {
+  console.log("update class");
+  //get the teacher id
+  let teacherId = req.token.teacherId;
+  let classSubject = req.body.class_subject;
+  let className = req.body.class_name;
+  let classId = req.params.id;
+
+  let sql = "UPDATE classes SET class_subject = ?, class_name = ?, teacher_id = ? WHERE id = ?;"
+  let params = [classSubject, className, teacherId, classId];
+
+  //run the db query with the specified params in the above order
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    } else {
+      //if there is more than one class
+      if(results.length > 1){
+        res.sendStatus(500);
+        return;
+      };
+      //if there is no class found
+      if(results.length == 0){
+        res.sendStatus(404);
+        return;
+      };
+      //if good results
+        //either send the results back, or send back 204 code
+      res.sendStatus(204);
+    };
+  });
+};
 
 //   DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
 //     **constraints: there are no foreign keys relying on this class_ID yet**
 // */
+const deleteClass = (req, res) => {
+  console.log("delete class")
+  let teacherId = req.token.teacherId;
+  let sql = "DELETE FROM classes WHERE id = ? and teacher_id = ?;";
+  let classId = req.params.id;
+  let params = [classId, teacherId];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    } else {
+      //if there is more than one class
+      if(results.length > 1){
+        res.sendStatus(500);
+        return;
+      };
+      //if there is no class found
+      if(results.length == 0){
+        res.sendStatus(404);
+        return;
+      };
+      //if good results
+        //either send the results back, or send back 204 code
+      res.sendStatus(204);
+    };
+  })
+}
 
-
-/*****Teacher Routes // students_classes Table *****
-  POST '/class_name' - (protected route) allows a teacher to add a new student in their class
+/*****Teacher Routes // students_classes Table *****/
+  /*POST '/class_name' - (protected route) allows a teacher to add a new student in their class
   takes in:
       class_ID
       student_ID,
-    then * adds the student to the class
+    then * adds the student to the class*/
 
-  GET '/class_name' - (protected route) allows a teacher to view all students in their class
+const addStudent = (req, res) => {
+  let classId = req.params.id;
+  let studentId = req.body.student_id
+
+  let sql = "INSERT INTO students_classes(class_id, student_id) VALUES(?, ?);";
+  let params = [classId, studentId];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    } else {
+      //if there is more than one class
+      if(results.length > 1){
+        res.sendStatus(500);
+        return;
+      };
+      //if there is no class found
+      if(results.length == 0){
+        res.sendStatus(404);
+        return;
+      };
+      //if good results
+        //either send the results back, or send back 204 code
+      res.sendStatus(204);
+    };
+
+  })
+};
+
+/*GET '/class_name' - (protected route) allows a teacher to view all students in their class
     takes in:
-      class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID
+      class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID*/
+const viewStudentClass = (req, res) => {
+  console.log("view list of students by class id")
+  let sql = "SELECT students_classes.class_id, user_name, students_classes.student_id FROM users INNER JOIN students ON students.user_id = users.id INNER JOIN students_classes WHERE class_id = ?;";
+  let classId = req.params.id;
+  let params = [classId];
 
-  GET '/class_name/:id' - (protected route) allows a teacher to view one specific student's profile information that is assigned to their class
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    } else {
+      //if there is no class/students found
+      if(results.length == 0){
+        res.sendStatus(404);
+        return;
+      };
+      //if good results
+        //either send the results back, or send back 204 code
+      res.json(results);
+    };
+  })
+};
+/*GET '/class_name/:id' - (protected route) allows a teacher to view one specific student's profile information that is assigned to their class
     takes in:
-      student_ID from the path paremeter id
+      student_ID from the path paremeter id*/
+const viewStudent = (req, res) => {
+  console.log("view student by id")
+  let studentId = req.params.id;
+  let sql = "SELECT users.user_name, students.id, students.birthday, students.emergency_contact, students.accomodations FROM students INNER JOIN users ON users.id = students.user_id WHERE students.id = ?;";
+  let params = [studentId];
 
-  PUT **student ids will not be updated for a class roster, simply deleted or added**
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      if(results.length > 1){
+        res.sendStatus(500);
+        return;
+      };
+      if(results.length == 0){
+        res.sendStatus(400);
+        return;
+      };
+      res.json(results);
+    };
+  });
+};
+// PUT **student ids will not be updated for a class roster, simply deleted or added**
 
-  DELETE '/class_name/:id' (protected route) allows a teacher to delete a student from the students_classes table
+/*DELETE '/class_name/:id' (protected route) allows a teacher to delete a student from the students_classes table
     takes in:
       student_id from the path parameter id
 */
+const removeStudent = (req, res) => {
+  console.log("remove from class")
+  let sql = "DELETE FROM students_classes WHERE student_id = ? AND class_id = ?;";
+  let class_id = req.body.class_id;
+  let student_id = req.body.student_id;
+  let params = [student_id, class_id];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not issue query to database", err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(204);
+    };
+  });
+};
 
 /*****Teacher Routes // Assignment Creation/Information*****
   POST '/assignment' - (protected route) allows a teacher to create a new assignment
@@ -252,4 +410,10 @@ module.exports = {
   createClass,
   getClasses,
   getClass,
+  updateClass,
+  deleteClass,
+  addStudent,
+  viewStudentClass,
+  viewStudent,
+  removeStudent
 }

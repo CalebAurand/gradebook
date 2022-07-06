@@ -151,7 +151,7 @@ SELECT class_subject, class_name, teacher_id, FROM classes WHERE id = ?;
 
   -- PUT '/class/:id' - (protected route) allows a teacher to update their class information
     -- [subject, class_name]
-UPDATE classes SET class_subject = ?, class_name = ?, teacher_id = ?, WHERE ID = ?; 
+UPDATE classes SET class_subject = ?, class_name = ?, teacher_id = ? WHERE ID = ?; 
 
   -- DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
     -- **constraints: there are no foreign keys relying on this class_ID yet**
@@ -168,7 +168,7 @@ INSERT INTO students_classes(class_id, student_id) VALUES(?, ?);
   -- GET '/class_name' - (protected route) allows a teacher to view all students in their class
   --   takes in:
   --     class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID
-  SELECT * FROM students_classes WHERE class_id = ?;
+  SELECT classes.class_name, user_name, students.id FROM users INNER JOIN students_classes AND classes ON students.id = students_class.student_id AND classes.id = students_classes.class_id WHERE class_id = ?;
 
   -- GET '/class_name/:id' - (protected route) allows a teacher to view one specific student's profile information that is assigned to their class
   --   takes in:
@@ -180,7 +180,7 @@ INSERT INTO students_classes(class_id, student_id) VALUES(?, ?);
   -- DELETE '/class_name/:id' (protected route) allows a teacher to delete a student from the students_classes table
   --   takes in:
   --     student_id from the path parameter id
-  DELETE FROM students_classes WHERE student_id = ?;
+  DELETE FROM students_classes WHERE student_id = ? and class_id = ?;
 
 /*****Teacher Routes // Assignment Creation/Information*****/
  /* POST '/assignment' - (protected route) allows a teacher to create a new assignment
@@ -233,12 +233,14 @@ UPDATE grades SET assignment_id = ?, student_id = ?, grade = ?, comments = ?;
 SELECT id, assignment_name, grades.student_id, grades.grade FROM assignments INNER JOIN grades ON id = grades.assignment_id WHERE class_id = ?;
 
   /*GET '/class_name/grades/:id' - (protected route) gets the grades of one student in the specified class*/
+SELECT id, assignment_name, grades.student_id, grades.grade FROM assignments INNER JOIN grades ON id = grades.assignment_id WHERE grades.student_id = ?;
 
-  /*DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
+  /*DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by the grade item's id
   */
+DELETE FROM grades WHERE id = ?;
 
-  /*****Teacher Routes // Attendance Creation/Information*****
-  POST '/attendance' - (protected route) allows a teacher to create a new attendance row for a student on a certain date
+  /*****Teacher Routes // Attendance Creation/Information*****/
+/*  POST '/attendance' - (protected route) allows a teacher to create a new attendance row for a student on a certain date
     takes in:
       Class_ID
       Student_ID
@@ -246,29 +248,34 @@ SELECT id, assignment_name, grades.student_id, grades.grade FROM assignments INN
       attendance VARCHAR(10) [present, absent, excused, tardy]
 
     then:
-      creates that new row with the appropriate information, if it does not already exist in the attendance table
+      creates that new row with the appropriate information, if it does not already exist in the attendance table*/
+INSERT INTO class_attendance(class_id, student_id, record_date, attendance) VALUES(?, ?, ?, ?);
 
-  PUT '/attendance/:id' - (protected route) allows a teacher to update a student's attendance record
+/*  PUT '/attendance/:id' - (protected route) allows a teacher to update a student's attendance record
     takes in:
       class_id
       student_id
       date
-      attendance
+      attendance [present, absent, tardy, or excused]*/
+UPDATE class_attendance SET record_date = ?, attendance = ? WHERE class_id = ? AND student_id = ?;
 
-  GET '/class_name/attendance' - (protected route) allows a teacher to see all of the attendance records for their specified class in the address bar
+  -- GET '/class_name/attendance' - (protected route) allows a teacher to see all of the attendance records for their specified class in the address bar
+SELECT student_id, record_date, attendance FROM class_attendance WHERE class_id = ?;
 
-  GET '/class_name/attendance/:id' - (protected route) allows a teacher to see all of the attendance records for one student in a particular class (class_name)
+  -- GET '/class_name/attendance/:id' - (protected route) allows a teacher to see all of the attendance records for one student in a particular class (class_name)
+SELECT student_id, record_date, attendance FROM class_attendance WHERE class_id = ? AND student_id = ?;
 
-  GET '/attendance/:id' - (protected route) allows a teacher to see all of the attendance records [in all classes] for one student
+  -- GET '/attendance/:id' - (protected route) allows a teacher to see all of the attendance records [in all classes] for one student
+SELECT student_id, class_id, record_date, attendance FROM class_attendance WHERE student_id = ?;
 
-  DELETE 'class_name/attendance/:id' (protected route) allows a teacher to delete one specific attendance record for a student
+/*  DELETE 'class_name/attendance/:id' (protected route) allows a teacher to delete one specific attendance record for a student
     takes in:
       student_id as the path parameter
       class_id
       date
     then: deletes that date's attendance record
 */
-
+DELETE FROM class_attendance WHERE class_id = ? AND student_id = ? AND record_date = ?;
 
 /*****Teacher Routes // Student Viewing or Deletion*****/
   -- DELETE '/student/:id' (protected route) allows a teacher to delete a student record from the students table, and from the users table **if authorized**
@@ -288,10 +295,10 @@ INSERT INTO users (user_name, email, pw_hash) VALUES (?, ?, ?);
 SELECT pw_hash FROM users WHERE email = ?;
 
 -- //GET '/studentGrades' - returns a list of the students assignments and the associated grades
-
+SELECT assignments.id, assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ?;
 
 -- //GET '/studentGrade/:id' - gives the details and any comments or notes that the teacher wrote on the student's individual assignment-grade
-
+SELECT assignments.id, assignments.assignment_name, assignments.assignment_description, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ? AND assignments.id = ?;
 -- //PUT '/student/:id' - (protected route) allows a student to update their password
 
 -- //POST*****students do not have access to create new students*****
