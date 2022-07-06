@@ -120,6 +120,9 @@ SELECT users.user_name, users.email, teachers.certifications FROM users INNER JO
   -- PUT '/teacher/:id' - (protected route) allows a teacher to update their name
 UPDATE users SET user_name = ? WHERE id = ?;
 
+  -- PUT '/teacher/:id' - (protected route) allows a teacher to update their certifications
+UPDATE teachers SET certifications = ? WHERE id = ?;
+
 -- -- PUT '/teacher/:id' - (protected route) after verifying jwt again, allows a user to update their password
 UPDATE users SET pw_hash = ? WHERE id = ?;
 

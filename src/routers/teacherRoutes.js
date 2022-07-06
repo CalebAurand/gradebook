@@ -21,6 +21,10 @@ teacherRouter.get('/view-teachers', teacherController.viewTeachers);
 teacherRouter.get('/view-teacher', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.viewOneTeacher);
 
 //   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or **password **password update functionality coming later
+teacherRouter.put('/update-teacher', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.updateTeacher);
+
+//PUT '/update-certifications', (protected route) allows a teacher to update their certifications
+teacherRouter.put('/update-certifications', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.updateCertifications);
 
 //   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
 

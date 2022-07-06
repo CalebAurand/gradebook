@@ -8,8 +8,6 @@ const db = require('../model/db');
 */
 
 
-
-
 /*****Teacher Routes // teacher information*****/
   // GET '/teachers' - returns a list of the teachers names for their school
 const viewTeachers = (req, res) => {
@@ -52,10 +50,52 @@ const viewOneTeacher = (req, res) => {
     };
   });
 };
+
 //   PUT '/teacher/:id' - (protected route) allows a teacher to update their name, and/or password
+const updateTeacher = (req, res) => {
+  console.log("update teacher");
+  //try to update teacher name here
+  let userId = req.token.userId;
+  let sql = "UPDATE users SET user_name = ? WHERE id = ?;";
+  let teacherName = req.body.name;
+  let params = [teacherName, userId];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(204);
+    };
+  });
+};
+
+const updateCertifications = (req, res) => {
+  console.log("update teacher certs")
+  //try to update teacher certifications here
+  let sql2 = "UPDATE teachers SET certifications = ? WHERE id = ?;";
+  let teacherId = req.token.teacherId;
+  let certifications = req.body.certifications;
+  let params2 = [certifications, teacherId];
+
+  db.query(sql2, params2, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(204);
+    };
+  });
+};
 
 //   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+const deleteTeacher = (req, res) => {
+  console.log("delete teacher");
 
+  db.query(sql, params, (err, results)=>{
+
+  });
+};
 //   **POST** teachers are not allowed to make other teachers accounts
 //   *DELETE* teachers **are not** authorized to delete *other* teacher accounts
 // */
@@ -406,7 +446,10 @@ const removeStudent = (req, res) => {
 //export the functions for teachers controller
 module.exports = {
   viewTeachers,
+  updateTeacher,
+  updateCertifications,
   viewOneTeacher,
+  deleteTeacher,
   createClass,
   getClasses,
   getClass,
@@ -415,5 +458,6 @@ module.exports = {
   addStudent,
   viewStudentClass,
   viewStudent,
-  removeStudent
+  removeStudent,
+  
 }
