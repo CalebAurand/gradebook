@@ -92,8 +92,19 @@ const updateCertifications = (req, res) => {
 const deleteTeacher = (req, res) => {
   console.log("delete teacher");
 
-  db.query(sql, params, (err, results)=>{
+  //try to update teacher name here
+  let teacherId = req.token.teacherId;
+  let sql = "DELETE FROM teachers";
+  let teacherName = req.body.name;
+  let params = [teacherName, userId];
 
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(204);
+    };
   });
 };
 //   **POST** teachers are not allowed to make other teachers accounts

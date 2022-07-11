@@ -27,6 +27,7 @@ teacherRouter.put('/update-teacher', auth.verifyJWT, teacherRegController.getTea
 teacherRouter.put('/update-certifications', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.updateCertifications);
 
 //   DELETE '/teacher/:id' - (protected route) allows a teacher to delete **their own** account **if authorized**
+teacherRouter.delete('/delete-teacher', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.deleteTeacher);
 
 //   **POST** teachers are not allowed to make other teachers accounts
 //   *DELETE* teachers **are not** authorized to delete *other* teacher accounts
