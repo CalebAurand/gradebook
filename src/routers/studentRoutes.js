@@ -21,7 +21,8 @@ studentRouter.get('/student-quizzes', auth.verifyJWT, studentRegController.getSt
 //GET '/studentGrade/:id' - gives the details and any comments or notes that the teacher wrote on the student's individual assignment-grade
 studentRouter.get('/student-grade/:id', auth.verifyJWT, studentRegController.getStudentId, studentController.getGrade);
 
-//do one for all grades for that student id
+//do one for all grades for that student id - coming soon
+studentRouter.get('/student-grades', auth.verifyJWT, studentController.getGrades);
 
 //do one for homework
 

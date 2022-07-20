@@ -85,7 +85,7 @@ teacherRouter.get('/view-student/:id', auth.verifyJWT, teacherRegController.getT
   takes in:
     student_id from the path parameter id
 */
-teacherRouter.delete('/remove-student', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.removeStudent);
+teacherRouter.delete('/remove-student/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.removeStudent);
 
 /*****Teacher Routes // Assignment Creation/Information*****
 POST '/assignment' - (protected route) allows a teacher to create a new assignment
