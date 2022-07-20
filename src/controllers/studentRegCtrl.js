@@ -73,21 +73,45 @@ const studentLogin = async (req, res) => {
     let hash = result[0].pw_hash;
     let userId = result[0].id;
 
-    //store boolean in variable for password verification
-    let goodPassword = await argon.verify(hash, password);
-
+    //code for second db.query to get studentId
+    let sql2 = "SELECT id FROM students WHERE user_id = ?;";
+    let params2 = [userId];
+    let studentId;
     //create user's token for them to receive if the password is verified
     let token = {
       "userId": userId,
       "email": email,
     };
+
+      db.query(sql2, params2, async function(err2, result2){
+        if(err2){
+          console.log("could not get student id", err);
+        }else{
+          studentId = result2[0].id;
+          console.log("found student Id is", studentId);
+          token = {
+            "userId": userId,
+            "email": email,
+            "studentId": studentId,
+          }
+          //store boolean in variable for password verification
+          let goodPassword = await argon.verify(hash, password);
+
+          //console log test statements
+          console.log(
+            "userId is", userId,
+            "studentId is", studentId
+          )
     
-    if(goodPassword){
-      let signedToken = jwt.sign(token, process.env.JWT_SECRET);
-      res.json(signedToken);
-    } else {
-      res.sendStatus(400);
-    };
+          if(goodPassword){
+            let signedToken = jwt.sign(token, process.env.JWT_SECRET);
+            res.json(signedToken);
+          } else {
+            res.sendStatus(400);
+          };
+        };
+      });
+    
   });
 };
 
