@@ -22,7 +22,7 @@ studentRouter.get('/student-quizzes', auth.verifyJWT, studentRegController.getSt
 studentRouter.get('/student-grade/:id', auth.verifyJWT, studentRegController.getStudentId, studentController.getGrade);
 
 //do one for all grades for that student id - coming soon
-studentRouter.get('/student-grades', auth.verifyJWT, studentController.getGrades);
+// studentRouter.get('/student-grades', auth.verifyJWT, studentController.getGrades);
 
 //do one for homework
 
