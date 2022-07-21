@@ -72,6 +72,26 @@ const getGrade = (req, res) => {
   })
 };
 
+//function returns all the grades that a student has from the grades table
+const getGrades = (req, res)=>{
+  console.log("getting student grades");
+  let studentId = req.token.studentId;
+  console.log("token", req.token);
+  console.log("studentId", studentId);
+
+  //sql for the db query for all the test grades for a student
+  let sql = "SELECT assignments.id, assignments.assignment_name, grades.grade FROM assignments INNER JOIN grades ON assignments.id = grades.assignment_id WHERE grades.student_id = ?;";
+  let params = [studentId];
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      res.sendStatus(500);
+    }else {
+      console.log("grade results", results);
+      res.send(results);
+    }
+  })
+};
+
 //functions returns the student's gpa
 
 //export the functions for student's:
@@ -81,5 +101,6 @@ const getGrade = (req, res) => {
 module.exports = {
   allTests,
   allQuizzes,
-  getGrade
+  getGrade, 
+  getGrades
 }

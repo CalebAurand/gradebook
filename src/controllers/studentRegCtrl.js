@@ -83,7 +83,7 @@ const studentLogin = async (req, res) => {
       "email": email,
     };
 
-      db.query(sql2, params2, async function(err2, result2){
+    db.query(sql2, params2, async function(err2, result2){
         if(err2){
           console.log("could not get student id", err);
         }else{
