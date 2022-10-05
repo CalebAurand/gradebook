@@ -27,9 +27,43 @@ const jwt = require('jsonwebtoken');
     if(err){
       console.log("could not add user", err);
       res.sendStatus(500);
+      return;
     }else{
-      res.sendStatus(204);
-    }
+      //send query to get user Id from database by email
+      //store user Id in a variable
+      //use userId to create a student Id in the students table
+      let sql2 = "SELECT id FROM users WHERE email = ?;";
+      let params2 = [email];
+      db.query(sql2, params2, function(err2, result2){
+        if(err2){
+          console.log("something went wrong", err2);
+          res.sendStatus(500);
+          return;
+        };
+        if(result2.length > 1){ //if find too many users
+          res.sendStatus(500);
+          return;
+        };
+        //if find too few users
+        if(result2.length == 0){
+          res.sendStatus(400);
+          return;
+        };
+        //if here then user found, store user id in variable and proceed to next db query
+        let userId = result2[0].id;
+        let sql3 = "INSERT INTO teachers (user_id) VALUES(?);";
+        let params3 = [userId];
+        db.query(sql3, params3, function(err3, result3){
+          if(err3){
+            console.log("something went wrong", err3);
+            return;
+          }else{
+            res.sendStatus(204);
+          };
+        });
+        
+      });
+    };
   });
 };
 
@@ -48,6 +82,7 @@ const jwt = require('jsonwebtoken');
   //get email from request body and password...
   let email = req.body.email;
   let password = req.body.password;
+  // console.log('parse body', JSON.parse(req.body))
 
   //assign the sql statement to be used in the db query
   let sql = "SELECT id, pw_hash from users where email = ?;";
@@ -89,24 +124,22 @@ const jwt = require('jsonwebtoken');
         return;
       }
       teacherId = results[0].id;
+      //store boolean in variable for password verification
+      let goodPassword = await argon.verify(hash, password);
+      console.log('good password', 'teacherId is', teacherId);
+      //create user's token for them to receive if the password is verified
+      let token = {
+        "userId": userId,
+        "email": email,
+        "teacherId": teacherId,
+      };
+      if(goodPassword){
+        let signedToken = jwt.sign(token, process.env.JWT_SECRET);
+        res.json(signedToken);
+      } else {
+        res.sendStatus(400);
+      };
     });
-
-    //store boolean in variable for password verification
-    let goodPassword = await argon.verify(hash, password);
-
-    //create user's token for them to receive if the password is verified
-    let token = {
-      "userId": userId,
-      "email": email,
-      "teacherId": teacherId,
-    };
-    
-    if(goodPassword){
-      let signedToken = jwt.sign(token, process.env.JWT_SECRET);
-      res.json(signedToken);
-    } else {
-      res.sendStatus(400);
-    };
   });
 };
 

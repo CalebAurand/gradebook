@@ -15,13 +15,15 @@
     <h2 id="teacher-h2"></h2>
     <h2>Entity Relationship Diagram</h2>
     <img src=".../images/GradeBookERDiagram2.png" alt="ER Diagram for Gradebook application">
+    <h3>Student Routes</h3>
+    <h4>Unprotected Routes</h4>
+    <p>/student-registration >>> allows a student to register in the database with a name, email and password</p>
+    <p>/student-login >>> allows a student to login and receive a JSON Web Token for later access to their class and grade information. The teachers will sign students up for their classes, and give them individual grades.</p>
+    <h4>Protected Routes</h4>
     <p>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam a dicta laudantium et sapiente dolorem quaerat sed autem recusandae mollitia sunt facilis similique esse quibusdam dolor, ad, perspiciatis asperiores voluptatibus!
-    Quisquam natus possimus eos ex earum veritatis consectetur, quidem, esse quos tempora saepe, commodi suscipit ullam nobis ipsa repudiandae perferendis eveniet? Obcaecati, qui eligendi ea quis quas architecto laudantium nesciunt.
-    Corrupti aspernatur iure itaque placeat? Numquam esse asperiores nobis blanditiis, temporibus molestias eveniet, porro voluptates distinctio odit eligendi? Voluptatem nihil quae consectetur quam perferendis distinctio cumque totam voluptatum. Rem, modi!
-    Perspiciatis voluptate odit quasi accusamus cum veniam amet maxime dolore odio necessitatibus debitis ducimus similique, ratione provident in qui asperiores vero ullam rem repellendus. Laboriosam quis esse veritatis fugiat cum.
-    Quas rem, saepe recusandae nulla molestias ut itaque earum et odit modi minima nobis aspernatur, distinctio esse sed fuga magnam sunt incidunt sint cum. Atque rerum facere accusantium quo aut!
-  </p>
+      /student-classes >> returns all the logged in student's classes they are enrolled in
+    </p>
+    <p>/student-grades >> returns all the grades that a student has received</p>
   <p>
     Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga porro rem quis repellendus tempora architecto odit labore cupiditate mollitia voluptates doloremque, illo officia cumque impedit consectetur, deserunt sed ad nulla?
     Rem, sapiente fuga assumenda ut quidem atque odio voluptates quaerat, hic odit saepe aliquid, ipsam quod laborum! Cum, nihil architecto tempora nulla nostrum cupiditate non ipsum laboriosam distinctio unde enim.

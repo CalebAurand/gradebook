@@ -11,16 +11,16 @@ const auth = require('../middleware/auth');
 
 /*****Teacher Routes // login and Authorization*****/
 //route for teacher registration
-teacherRegRouter.post('/teacher-registration', auth.verifyJWT, teacherRegCtrl.registerTeacher);
+teacherRegRouter.post('/teacher-registration', teacherRegCtrl.registerTeacher);
 
 //route for teacher login
 /*
-POST '/login' - logs a teacher in to the gradebook, verifies email and pw_hash, then confirms that email and pw_hash has role of teacher and then issues a JWT     
+POST '/teacher-login' - logs a teacher in to the gradebook, verifies email and pw_hash, then confirms that email and pw_hash has role of teacher and then issues a JWT     
   takes in:
       email
       password
 */
-teacherRegRouter.post('/teacher-login', auth.verifyJWT, teacherRegCtrl.teacherLogin);
+teacherRegRouter.post('/teacher-login', teacherRegCtrl.teacherLogin);
 
 //route for teachers to have their teacher Id created
 teacherRegRouter.post('/createTeacherId', auth.verifyJWT, teacherRegCtrl.createTeacherId);

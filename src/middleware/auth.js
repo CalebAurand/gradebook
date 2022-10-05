@@ -16,6 +16,7 @@ const verifyJWT = (req, res, next) => {
     jwt.verify(signedToken, process.env.JWT_SECRET, (err, decoded)=>{
       if(err){
         //if the token cannot be verified send back the 400 error code
+        console.log("error", err);
         res.sendStatus(400);
       } else {
         let token = jwt.verify(signedToken, process.env.JWT_SECRET);

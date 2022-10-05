@@ -123,6 +123,7 @@ const deleteTeacher = (req, res) => {
   //       creates a row in the classes table with the class' id, subject, Class_Name, and Teacher_ID
 const createClass = (req, res) => {
   console.log("create class");
+  console.log("request body", req.body)
   let teacherId = req.token.teacherId;
   let class_subject = req.body.class_subject;
   let class_name = req.body.class_name;
@@ -140,11 +141,42 @@ const createClass = (req, res) => {
   });
 };
 
-//   GET '/classes' - returns all the classes that a teacher is assigned to, grouped together by subject
+//GET '/view-classes' - returns the classes that a teacher is assigned to
 const getClasses = (req, res) => {
   console.log("get classes");
-  let teacherId = req.params.id;
-  let sql = "SELECT class_subject, class_name FROM classes WHERE teacher_id = ?";
+  let teacherId;
+  if(req.token.teacherId){
+    teacherId = req.token.teacherId;
+  } else if(req.params.id){
+    teacherId = req.params.id;
+  } else {
+    return;
+  }
+  let sql = "SELECT id, class_name, class_subject FROM classes WHERE teacher_id = ?;";
+  let params = [teacherId];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query db", err);
+      res.sendStatus(500);
+    }else{
+      res.json(results);
+    };
+  });
+}
+
+//   GET '/view-count-classes' - returns all the classes that a teacher is assigned to, grouped together by class id, with the student count
+const getCountClasses = (req, res) => {
+  console.log("get count classes");
+  let teacherId;
+  if(req.token.teacherId){
+    teacherId = req.token.teacherId;
+  } else if(req.params.id){
+    teacherId = req.params.id;
+  } else {
+    return;
+  }
+  let sql = "SELECT classes.id, classes.class_name, classes.class_subject, classes.teacher_id, COUNT(students_classes.student_id) AS count FROM classes LEFT JOIN students_classes ON classes.id = students_classes.class_id WHERE classes.teacher_id = ? GROUP BY classes.id ORDER BY classes.class_name;";
   let params = [teacherId];
 
   db.query(sql, params, (err, results)=>{
@@ -288,12 +320,26 @@ const addStudent = (req, res) => {
   })
 };
 
+/**GET '/view-students' - (protected route) allows a teacher to view all students - for purpose of accessing student id's to add students to their class */
+const viewStudents = (req, res) => {
+  console.log("view all students");
+  let sql = "SELECT students.id, users.user_name, users.email FROM students INNER JOIN users ON students.user_id = users.id;";
+  db.query(sql, (err, result)=>{
+    if(err){
+      console.log("error", err);
+      res.sendStatus(500);
+    }else{
+      res.json(result);
+    }
+  })
+}
+
 /*GET '/class_name' - (protected route) allows a teacher to view all students in their class
     takes in:
       class_ID from the path parameter id and uses that to return all the students assigned to the matching class_ID*/
 const viewStudentClass = (req, res) => {
   console.log("view list of students by class id")
-  let sql = "SELECT students_classes.class_id, user_name, students_classes.student_id FROM users INNER JOIN students ON students.user_id = users.id INNER JOIN students_classes WHERE class_id = ?;";
+  let sql = "SELECT students_classes.class_id, students.id, users.user_name FROM users INNER JOIN students ON students.user_id = users.id INNER JOIN students_classes ON students.id = students_classes.student_id WHERE class_id = ?;";
   let classId = req.params.id;
   let params = [classId];
 
@@ -319,7 +365,7 @@ const viewStudentClass = (req, res) => {
 const viewStudent = (req, res) => {
   console.log("view student by id")
   let studentId = req.params.id;
-  let sql = "SELECT users.user_name, students.id, students.birthday, students.emergency_contact, students.accomodations FROM students INNER JOIN users ON users.id = students.user_id WHERE students.id = ?;";
+  let sql = "SELECT students.id, users.user_name, students.birthday, students.emergency_contact, students.accomodations FROM students INNER JOIN users ON users.id = students.user_id WHERE students.id = ?;";
   let params = [studentId];
 
   db.query(sql, params, (err, results)=>{
@@ -346,10 +392,10 @@ const viewStudent = (req, res) => {
       student_id from the path parameter id
 */
 const removeStudent = (req, res) => {
-  console.log("remove from class")
   let sql = "DELETE FROM students_classes WHERE student_id = ? AND class_id = ?;";
-  let class_id = req.body.class_id;
+  let class_id = req.params.id;
   let student_id = req.body.student_id;
+  console.log(`remove studentId: ${student_id} from class: ${class_id}`);
   let params = [student_id, class_id];
 
   db.query(sql, params, (err, results)=>{
@@ -367,46 +413,219 @@ const removeStudent = (req, res) => {
     takes in:
       name - name of the assignment
       description - description of the assignment, constraints, instructions, etc
-      class_ID - class that the assignment is being made for
+      class_ID - class that the assignment is being made for*/
+const addAssignment = (req, res) => {
+  let classId = req.params.id;
+  console.log("adding assignment to class ID:", classId);
+  let sql = "INSERT INTO assignments(class_id, assignment_type, assignment_name, assignment_description) VALUES(?, ?, ?, ?);";
+  let name = req.body.name;
+  let type = req.body.type;
+  let description = req.body.description;
 
-  PUT '/assignment/:id' - (protected route) allows a teacher to update an existing assignment
+  let params = [classId, type, name, description];
+  db.query(sql, params, (err, result)=>{
+    if(err){
+      console.log("something went wrong", err)
+      res.sendStatus(500);
+    }else{
+      if(result.length > 1){
+        res.sendStatus(500);
+        return;
+      }else if(result.length == 0){
+        res.sendStatus(400);
+        return;
+      }else{
+        res.sendStatus(204);
+      }
+    }
+  })
+
+}
+
+  /*PUT '/assignment/:id' - (protected route) allows a teacher to update an existing assignment
     takes in:
       id - id of the assignment
       name - name of the assignment
       description - description of the assignment, constraints, instructions, etc
-      class_ID - class that the assignment is being made for
+      class_ID - class that the assignment is being made for*/
+  const updateAssignment = (req, res) => {
+    let assignmentId = req.params.id;
+    console.log("updating assignment with ID:", assignmentId);
+    let sql = "UPDATE assignments SET assignment_type = ?, assignment_name = ?, assignment_description = ? WHERE id = ?;"
+    let name = req.body.name;
+    let type = req.body.type;
+    let description = req.body.description;
+    let params = [type, name, description, assignmentId];
 
-  GET '/assignments/' - (protected route) allows a teacher to view all the assignments for a class
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("could not query db", err);
+        res.sendStatus(500);
+      } else {
+        //if there is more than one assignment with the id
+        if(results.length > 1){
+          res.sendStatus(500);
+          return;
+        };
+        //if there is no assignment found
+        if(results.length == 0){
+          res.sendStatus(404);
+          return;
+        };
+        //if good results
+          //either send the results back, or send back 204 code
+        res.sendStatus(204);
+      };
+    });
+  };
 
-  GET '/assignments/:id' - (protected route) allows a teacher to view an assignment in detail from assignment_ID
+  /*GET '/assignments/:id' - (protected route) allows a teacher to view all the assignments for a class*/
+  const getAssignments = (req, res) => {
+  console.log("get assignments by class id");
+  let classId = req.params.id;
+  let sql = "SELECT * FROM assignments WHERE class_id = ?;";
+  let params = [classId];
 
-  DELETE '/assignments/:id' - (protected route) allows a teacher to delete an assignment matching the assignment_ID
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not query database", err);
+      res.sendStatus(500);
+    } else {
+      if(results.length == 0){
+        res.sendStatus(400);
+        return;
+      };
+      res.json(results);
+    };
+  });
+};
+
+  /*GET '/assignment/:id' - (protected route) allows a teacher to view an assignment in detail from assignment_ID*/
+  const getAssignmentDetail = (req, res) => {
+    console.log("getting details for assignment");
+    let id = req.params.id;
+    let sql = "SELECT * from assignments WHERE id = ?;";
+    let params = [id];
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("could not query database", err);
+        res.sendStatus(500);
+      } else {
+        if(results.length == 0){
+          res.sendStatus(400);
+          return;
+        };
+        if(results.length > 1){
+          res.sendStatus(400);
+          return;
+        };
+        res.json(results);
+      };
+    });
+  }
+
+ /* DELETE '/assignment/:id' - (protected route) allows a teacher to delete an assignment matching the assignment_ID
 */
+const deleteAssignment = (req, res) => {
+  console.log("delete assignment");
+  let assignmentId = req.params.id;
+  let sql = "DELETE FROM assignments WHERE id = ?";
+  let params = [assignmentId];
+
+  db.query(sql, params, (err, results)=>{
+    if(err){
+      console.log("could not issue query to database", err);
+      res.sendStatus(500);
+    } else {
+      res.sendStatus(204);
+    };
+  });
+};
 
 
-/*****Teacher Routes // Grade Creation/Information*****
-  POST '/createGrade' - (protected route) allows a teacher to create a new grade for a student
+/*****Teacher Routes // Grade Creation/Information*****/
+  /*POST '/createGrade' - (protected route) allows a teacher to create a new grade for a student
     takes in:
       assignment_ID - ID of the assignment from the assignments table
       Student_ID - ID of the student from the students table
       grade - numerical grade of the student for the assignment
-      comments - teachers comments for the student about the assignment
+      comments - teachers comments for the student about the assignment*/
 
-  PUT '/updateGrade/:id' - (protected route) allows a teacher to update an existing grade for a student
-    takes in:
-      assignment_ID
-      Student_ID
-      grade
-      comments
+  // PUT '/updateGrade/:id' - (protected route) allows a teacher to update an existing grade for a student
+  //   takes in:
+  //     assignment_ID
+  //     Student_ID
+  //     grade
+  //     comments
 
-  GET '/class_name/grades/' - (protected route)(verifies that the teachers JWT Teacher_ID matches the class's Teacher_ID) 
-    then 
-      gets all assignment ids for the matching class_ID
-      returns the grades for all the students held in the grades table (matching the assignment IDs)
+  // GET '/class_name/grades/' - (protected route)(verifies that the teachers JWT Teacher_ID matches the class's Teacher_ID) 
+  //   then 
+  //     gets all assignment ids for the matching class_ID
+  //     returns the grades for all the students held in the grades table (matching the assignment IDs)
 
-  GET '/class_name/grades/:id' - (protected route) gets the grades of one student in the specified class
+  const getGrades = (req, res) => {
+    console.log("view grades by class id");
+    let classId = req.params.id;
+    let sql = "SELECT students.id AS studentId, users.user_name, grades.id AS gradeId, assignments.assignment_name, grades.grade, grades.comments FROM students INNER JOIN users ON users.id = students.user_id INNER JOIN grades ON students.id = grades.student_id INNER JOIN assignments ON assignments.id = grades.assignment_id WHERE assignments.class_id = ? ORDER BY grades.student_id;";
+    let params = [classId];
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("could not query database", err);
+        res.sendStatus(500);
+      } else {
+        if(results.length == 0){
+          res.sendStatus(400);
+          return;
+        };
+        res.json(results);
+      };
+    });
+  }
 
-  DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
+  /** GET 'get-student-grades/:id' - (protected route)(verifies the teacher has access, then 
+gets all the grades assigned to that student ID, with corresponding teacher ID
+so that teachers can only adjust grades from their classes, not others*/
+  const getStudentGrades = (req, res)=>{
+    console.log("getting student grades");
+    let teacherId = req.token.teacherId;
+    let studentId = req.params.id;
+    console.log("token", req.token);
+    console.log("studentId", studentId);
+  
+    //sql for the db query for all the grades for a student, filtered by teacherId
+    let sql = "SELECT students.id AS studentID, classes.class_name, assignments.class_id, assignments.assignment_name, assignments.assignment_type, grades.id AS gradeId, grades.grade, grades.comments FROM students INNER JOIN students_classes on students.id = students_classes.student_id INNER JOIN classes on classes.id = students_classes.class_id INNER JOIN assignments on classes.id = assignments.class_id INNER JOIN grades on assignments.id = grades.assignment_id WHERE students.id = ? AND grades.student_id = ? AND classes.teacher_id = ? ORDER BY grades.id;";
+    let params = [studentId, studentId, teacherId];
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        res.sendStatus(500);
+      }else {
+        console.log("grade results", results);
+        res.send(results);
+      }
+    })
+  };
+
+  // GET 'grade_detail/:id' - (protected route) gets the details of one grade in the specified class by grade id
+  const getGradeDetail = (req, res) => {
+    console.log("view grade detail by id");
+    let gradeId = req.params.id;
+    let sql = "SELECT students.id AS studentId, users.user_name, grades.id AS gradeId, assignments.class_id, assignments.assignment_name, assignments.assignment_type, assignments.assignment_description, grades.grade, grades.comments FROM students INNER JOIN users ON users.id = students.user_id INNER JOIN grades ON students.id = grades.student_id INNER JOIN assignments ON assignments.id = grades.assignment_id WHERE grades.id = ?;";
+    let params = [gradeId];
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("could not query database", err);
+        res.sendStatus(500);
+      } else {
+        if(results.length == 0){
+          res.sendStatus(400);
+          return;
+        };
+        res.json(results);
+      };
+    });
+  }
+
+  /*DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
   */
 
   /*****Teacher Routes // Attendance Creation/Information*****
@@ -463,12 +682,21 @@ module.exports = {
   deleteTeacher,
   createClass,
   getClasses,
+  getCountClasses,
   getClass,
   updateClass,
   deleteClass,
   addStudent,
+  viewStudents,
   viewStudentClass,
   viewStudent,
   removeStudent,
-  
+  getAssignments,
+  getAssignmentDetail,
+  addAssignment,
+  updateAssignment,
+  deleteAssignment,
+  getGrades,
+  getStudentGrades,
+  getGradeDetail,
 }

@@ -13,6 +13,9 @@ const studentRegController = require('../controllers/studentRegCtrl');
 //import auth middlware to verify jwt
 const auth = require('../middleware/auth');
 
+//GET '/student-classes' - returns a list of all of the classes that a student is in, as well as the subject and the teacher name
+studentRouter.get('/student-classes', auth.verifyJWT, studentController.studentClasses);
+
 //GET '/studentGrades' - returns a list of the students assignments and the associated grades
 studentRouter.get('/student-tests', auth.verifyJWT, studentController.allTests);
 
@@ -23,6 +26,9 @@ studentRouter.get('/student-grade/:id', auth.verifyJWT, studentController.getGra
 
 //do one for all grades for that student id - coming soon
 studentRouter.get('/student-grades', auth.verifyJWT, studentController.getGrades);
+
+//GET '/student-grades/:id' - returns all the grades from the class matching the id in the url params, for the student signed in with JWT
+studentRouter.get('/student-grades/:id', auth.verifyJWT, studentController.getClassGrades);
 
 //do one for homework
 
