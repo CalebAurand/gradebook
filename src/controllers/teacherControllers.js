@@ -555,8 +555,9 @@ const deleteAssignment = (req, res) => {
     let studentId = req.body.studentId;
     let gradesArr = req.body.grades;
     let gradesLength = gradesArr.length;
+    console.log("studentid", studentId, "gradesArr", gradesArr, "gradesLength", gradesLength)
     let valueMarks = '';//turn this into dynamic string with question marks;
-    for(let i=0; i<=gradesLength; i++){
+    for(let i=1; i<=gradesLength; i++){
       if(i===1){
         if(gradesLength === 1){
           valueMarks='(?, ?, ?);';
