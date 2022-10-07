@@ -56,7 +56,7 @@ teacherRouter.get('/view-class/:id', teacherController.getClass);
 
 // PUT '/class/:id' - (protected route) allows a teacher to update their class information
   // [subject, class_name]
-teacherRouter.put('/update-class/:id', auth.verifyJWT, teacherRegController.getTeacherId, teacherController.updateClass);
+teacherRouter.put('/update-class/:id', auth.verifyJWT, teacherController.updateClass);
 /*DELETE '/class_name/:id' - (protected route) allows a teacher to remove a class from the classes table
   **constraints: there are no foreign keys relying on this class_ID yet**
 */
@@ -127,7 +127,8 @@ teacherRouter.delete('/delete-assignment/:id', auth.verifyJWT, teacherController
 //     assignment_ID - ID of the assignment from the assignments table
 //     Student_ID - ID of the student from the students table
 //     grade - numerical grade of the student for the assignment
-//     comments - teachers comments for the student about the assignment
+//     comments - teachers comments for the student about the assignment*/
+teacherRouter.post('/add-grade', auth.verifyJWT, teacherController.addGrades);
 
 // PUT '/updateGrade/:id' - (protected route) allows a teacher to update an existing grade for a student
 //   takes in:
@@ -135,6 +136,7 @@ teacherRouter.delete('/delete-assignment/:id', auth.verifyJWT, teacherController
 //     Student_ID
 //     grade
 //     comments
+teacherRouter.put('/update-grade/:id', auth.verifyJWT, teacherController.updateGrade);
 
 // GET 'grades/:id' - (protected route)(verifies that the teachers JWT Teacher_ID matches the class's Teacher_ID) 
 //   then 
@@ -150,8 +152,9 @@ teacherRouter.get("/get-student-grades/:id", auth.verifyJWT, teacherController.g
 // GET 'grade_details/:id' - (protected route) gets the details of one grade in the specified class by grade id
 teacherRouter.get('/grade_details/:id', auth.verifyJWT, teacherController.getGradeDetail);
 
-/*DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
+/*DELETE '/delete-grade/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
 */
+teacherRouter.delete('/delete-grade/:id', auth.verifyJWT, teacherController.deleteGrade);
 
 /*****Teacher Routes // Attendance Creation/Information*****
 POST '/attendance' - (protected route) allows a teacher to create a new attendance row for a student on a certain date

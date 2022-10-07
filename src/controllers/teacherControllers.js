@@ -550,13 +550,74 @@ const deleteAssignment = (req, res) => {
       Student_ID - ID of the student from the students table
       grade - numerical grade of the student for the assignment
       comments - teachers comments for the student about the assignment*/
+  const addGrades = (req, res) => {
+    console.log('adding grades')
+    let studentId = req.body.studentId;
+    let gradesArr = req.body.grades;
+    let gradesLength = gradesArr.length;
+    let valueMarks = '';//turn this into dynamic string with question marks;
+    for(let i=0; i<=gradesLength; i++){
+      if(i===1){
+        if(gradesLength === 1){
+          valueMarks='(?, ?, ?);';
+        }else{
+          valueMarks='(?, ?, ?), ';
+        };
+      }if(i>1){
+        if(i<gradesLength){
+          valueMarks += '(?, ?, ?), ';
+        }else if(i === gradesLength){
+          valueMarks += '(?, ?, ?);';
+        };
+      };
+    };
+    let sql = `INSERT INTO grades(assignment_id, student_id, grade) VALUES${valueMarks}`
+    const params = [];
+    gradesArr.forEach(gradeItem=>{
+        params.push(gradeItem.assignmentId);
+        params.push(studentId);
+        params.push(gradeItem.grade);
+    });
+    console.log('grades', gradesArr)
+    console.log('valueMarks', valueMarks);
+    console.log("params before post", params);
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("err", err);
+        res.sendStatus(500);
+      }else{
+        res.sendStatus(204);
+      }
+    })
+  }
 
-  // PUT '/updateGrade/:id' - (protected route) allows a teacher to update an existing grade for a student
+  // PUT '/update-grade/:id' - (protected route) allows a teacher to update an existing grade for a student
   //   takes in:
   //     assignment_ID
   //     Student_ID
   //     grade
   //     comments
+  const updateGrade = (req, res) => {
+    let gradeId = req.params.id;
+    console.log("updating grade with id: ", gradeId);
+    let grade = req.body.grade;
+    let comments = req.body.comments;
+    let sql = "UPDATE grades SET grade = ?, comments = ? WHERE id = ?;";
+    let params = [grade, comments, gradeId];
+
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("err", err);
+        res.sendStatus(500);
+      }else{
+        if(results.length === 0){
+          res.sendStatus(400);
+        }else{
+          res.sendStatus(200);
+        };
+      }
+    })
+  }
 
   // GET '/class_name/grades/' - (protected route)(verifies that the teachers JWT Teacher_ID matches the class's Teacher_ID) 
   //   then 
@@ -589,17 +650,14 @@ so that teachers can only adjust grades from their classes, not others*/
     console.log("getting student grades");
     let teacherId = req.token.teacherId;
     let studentId = req.params.id;
-    console.log("token", req.token);
-    console.log("studentId", studentId);
   
     //sql for the db query for all the grades for a student, filtered by teacherId
-    let sql = "SELECT students.id AS studentID, classes.class_name, assignments.class_id, assignments.assignment_name, assignments.assignment_type, grades.id AS gradeId, grades.grade, grades.comments FROM students INNER JOIN students_classes on students.id = students_classes.student_id INNER JOIN classes on classes.id = students_classes.class_id INNER JOIN assignments on classes.id = assignments.class_id INNER JOIN grades on assignments.id = grades.assignment_id WHERE students.id = ? AND grades.student_id = ? AND classes.teacher_id = ? ORDER BY grades.id;";
+    let sql = "SELECT students.id AS studentID, classes.class_name, assignments.id AS assignment_id, assignments.class_id, assignments.assignment_name, assignments.assignment_type, grades.id AS gradeId, grades.grade, grades.comments FROM students INNER JOIN students_classes on students.id = students_classes.student_id INNER JOIN classes on classes.id = students_classes.class_id INNER JOIN assignments on classes.id = assignments.class_id INNER JOIN grades on assignments.id = grades.assignment_id WHERE students.id = ? AND grades.student_id = ? AND classes.teacher_id = ? ORDER BY grades.assignment_id;";
     let params = [studentId, studentId, teacherId];
     db.query(sql, params, (err, results)=>{
       if(err){
         res.sendStatus(500);
       }else {
-        console.log("grade results", results);
         res.send(results);
       }
     })
@@ -627,6 +685,21 @@ so that teachers can only adjust grades from their classes, not others*/
 
   /*DELETE '/class_name/grades/:id' - (protected route) deletes one grade record of one student in the class (class_name) by student_ID 
   */
+  const deleteGrade = (req, res) => {
+    let gradeId = req.params.id;
+    console.log("delete Grade by id: ", gradeId);
+    let sql = "DELETE FROM grades WHERE id = ?";
+    let params = [gradeId];
+  
+    db.query(sql, params, (err, results)=>{
+      if(err){
+        console.log("could not issue query to database", err);
+        res.sendStatus(500);
+      } else {
+        res.sendStatus(204);
+      };
+    });
+  };
 
   /*****Teacher Routes // Attendance Creation/Information*****
   POST '/attendance' - (protected route) allows a teacher to create a new attendance row for a student on a certain date
@@ -699,4 +772,7 @@ module.exports = {
   getGrades,
   getStudentGrades,
   getGradeDetail,
+  addGrades,
+  updateGrade,
+  deleteGrade
 }
