@@ -17,9 +17,9 @@ app.use(cors({
   origin: ['https://home-grade-book.vercel.app']
 }));
 
-// app.use(cors({
-//   origin: ['https://home-grade-book.vercel.app/student-login']
-// }));
+app.use(cors({
+  origin: ['https://home-grade-book.vercel.app/student-login']
+}));
 
 // tell the app to use the bodyParser.json() method to be able to read json
 app.use(bodyParser.json());
