@@ -14,7 +14,7 @@ let app = new express();
 
 //tell app to use cors package for network security errors
 app.use(cors({
-  origin: ['https://home-grade-book.vercel.app']
+  origin: ['https://home-grade-book.vercel.app', 'https://home-grade-book.vercel.app/', 'https://home-grade-book.vercel.app/student-login']
 }));
 
 // tell the app to use the bodyParser.json() method to be able to read json
